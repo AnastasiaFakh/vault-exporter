@@ -1,0 +1,31 @@
+name: Build tar.gz
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-tar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build source archive
+        run: |
+          mkdir -p dist
+          git archive \
+            --format=tar.gz \
+            --prefix=vault-exporter/ \
+            --output=dist/vault-exporter.tar.gz \
+            HEAD
+
+      - name: Upload archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: vault-exporter-tar-gz
+          path: dist/vault-exporter.tar.gz

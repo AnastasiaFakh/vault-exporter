@@ -1,0 +1,26 @@
+mount,path,type,owner,service,status,notes
+app,camunda-reader,unknown,unknown,camunda-reader,needs_secret_field_audit,Found by path listing; read fields to classify cert/crl/key/keystore
+app,camunda-writer,unknown,unknown,camunda-writer,needs_secret_field_audit,Found by path listing; read fields to classify cert/crl/key/keystore
+app,certsentry,unknown,unknown,certsentry,needs_secret_field_audit,Found by path listing; read fields to classify cert/crl/key/keystore
+app,dcpay-mcew-authentication-reader,unknown,unknown,dcpay-mcew-authentication-reader,needs_secret_field_audit,Found by path listing; read fields to classify cert/crl/key/keystore
+app,dcpay-mcew-authentication-writer,unknown,unknown,dcpay-mcew-authentication-writer,needs_secret_field_audit,Found by path listing; read fields to classify cert/crl/key/keystore
+app,dcpay-mcew-authentication,unknown,unknown,dcpay-mcew-authentication,needs_secret_field_audit,Found by path listing; read fields to classify cert/crl/key/keystore
+app,dcpay-mcia-catalog-service-reader,unknown,unknown,dcpay-mcia-catalog-service-reader,needs_secret_field_audit,Found by path listing; read fields to classify cert/crl/key/keystore
+app,dcpay-mcia-catalog-service-writer,unknown,unknown,dcpay-mcia-catalog-service-writer,needs_secret_field_audit,Found by path listing; read fields to classify cert/crl/key/keystore
+app,dcpay-mcia-catalog,unknown,unknown,dcpay-mcia-catalog,needs_secret_field_audit,Found by path listing; read fields to classify cert/crl/key/keystore
+app,telegram-notification,unknown,unknown,telegram-notification,needs_secret_field_audit,Found by path listing; read fields to classify cert/crl/key/keystore
+app,dcpay-cew-bff/certenv,certificate,unknown,dcpay-cew-bff,covered,Example contains cert.crt with subject/issuer/serial/notAfter
+app,dcpay-cia-limit-gate/certs-new,certificate_chain,unknown,dcpay-cia-limit-gate,covered,Example contains ca.crt; multi-cert PEM is exported as ca.crt[0], ca.crt[1]
+app,dcpay-cia-limit-gate/test-mtls-limit-gate,mtls_material,unknown,dcpay-cia-limit-gate,needs_secret_field_audit,Likely mTLS cert/key/CA/CRL material
+app,dcpay-cic-notify-com-driver/cert,certificate,unknown,dcpay-cic-notify-com-driver,needs_secret_field_audit,Likely certificate material
+app,dcpay-mcew-authentication/certs,certificate,unknown,dcpay-mcew-authentication,needs_secret_field_audit,Likely certificate material
+secret,certs,certificate_or_crl,unknown,certs,needs_secret_field_audit,KV v2 mount included by default
+test,camunda-test,unknown,unknown,camunda-test,covered_if_enabled,KV v2 mount included by default
+test,cert-manager,certificate_or_crl,unknown,cert-manager,covered_if_enabled,KV v2 mount included by default
+test,amodule/backend-jks,keystore,unknown,amodule,inventory_only,JKS/keystore/truststore are inventoried but not decoded
+test,ingress-nginx/tls,certificate_or_crl,unknown,ingress-nginx,covered_if_enabled,Likely tls.crt/tls.key; tls.key is inventoried without parse-failed
+database,camunda,unknown,unknown,camunda,pending_kv2_check,Add database to VAULT_KV_MOUNTS only if sys/mounts/database reports kv version 2
+database,certsentry,unknown,unknown,certsentry,pending_kv2_check,Add database to VAULT_KV_MOUNTS only if sys/mounts/database reports kv version 2
+database,mpay-authentication,unknown,unknown,mpay-authentication,pending_kv2_check,Add database to VAULT_KV_MOUNTS only if sys/mounts/database reports kv version 2
+database,mpay-catalog,unknown,unknown,mpay-catalog,pending_kv2_check,Add database to VAULT_KV_MOUNTS only if sys/mounts/database reports kv version 2
+database,mpay-catalog-service,unknown,unknown,mpay-catalog-service,pending_kv2_check,Add database to VAULT_KV_MOUNTS only if sys/mounts/database reports kv version 2
