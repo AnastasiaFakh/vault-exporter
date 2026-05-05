@@ -81,75 +81,20 @@ Check metrics:
 curl http://localhost:9108/metrics
 ```
 
-## Build Docker Image
-
-```bash
-docker build -t vault-kv-cert-exporter:latest .
-```
-
 ## Build tar.gz Archive
 
 ```powershell
 .\scripts\build-tar.ps1
 ```
 
-The archive is written to `dist/vault-exporter.tar.gz`. GitHub Actions also builds the same archive on pushes to `main`, pull requests, and manual workflow runs.
+The archive is written to `dist/vault-exporter.tar.gz`.
 
-## Run In Docker
+GitHub Actions builds the same archive on pushes to `main`, pull requests, and manual workflow runs. Download the `vault-exporter-tar-gz` artifact from the `Build tar.gz` workflow run.
+
+## Run From GitHub tar.gz
 
 ```bash
-docker run --rm -p 9108:9108 \
-  -e VAULT_ADDR="https://vault.example.com" \
-  -e VAULT_TOKEN="$TOKEN" \
-  -e VAULT_KV_MOUNTS="app,secret,test" \
-  vault-kv-cert-exporter:latest
-```
-
-## Docker Compose Example
-
-```yaml
-services:
-  vault-kv-cert-exporter:
-    image: vault-kv-cert-exporter:latest
-    ports:
-      - "9108:9108"
-    environment:
-      VAULT_ADDR: "https://vault.example.com"
-      VAULT_TOKEN: "${VAULT_TOKEN}"
-      VAULT_KV_MOUNTS: "app,secret,test"
-      SCRAPE_INTERVAL_SECONDS: "300"
-```
-
-## Kubernetes Deployment Example
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: vault-kv-cert-exporter
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: vault-kv-cert-exporter
-  template:
-    metadata:
-      labels:
-        app: vault-kv-cert-exporter
-    spec:
-      containers:
-        - name: exporter
-          image: vault-kv-cert-exporter:latest
-          ports:
-            - name: metrics
-              containerPort: 9108
-          env:
-            - name: VAULT_ADDR
-              value: "https://vault.example.com"
-            - name: VAULT_KV_MOUNTS
-              value: "app,secret,test"
-            - name: VAULT_KUBERNETES_ROLE
-              value: "vault-kv-cert-exporter"
+VAULT_ADDR='https://vault.example.com' VAULT_TOKEN='PUT_TOKEN_HERE' sh -c 'set -eu; work="$(mktemp -d)"; curl -L "https://github.com/AnastasiaFakh/vault-exporter/archive/refs/heads/main.tar.gz" -o "$work/vault-exporter.tar.gz"; tar -xzf "$work/vault-exporter.tar.gz" -C "$work"; cd "$work/vault-exporter-main"; python3 -m venv .venv || { pyver="$(python3 -c "import sys; print(f\"{sys.version_info.major}.{sys.version_info.minor}\")")"; installer="apt-get"; if command -v sudo >/dev/null 2>&1; then installer="sudo apt-get"; fi; $installer update && $installer install -y "python${pyver}-venv"; python3 -m venv .venv; }; .venv/bin/python -m pip install -r requirements.txt; .venv/bin/python app.py'
 ```
 
 ## Vault Policy Example
