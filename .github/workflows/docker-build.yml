@@ -1,0 +1,47 @@
+name: Docker build and metrics smoke test
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t vault-kv-cert-exporter:test .
+
+      - name: Start exporter
+        run: |
+          docker run -d --name vault-kv-cert-exporter \
+            -p 9108:9108 \
+            -e VAULT_ADDR=http://127.0.0.1:8200 \
+            -e VAULT_TOKEN=dummy-token \
+            -e VAULT_KV_MOUNTS=app,secret,test \
+            -e SCRAPE_INTERVAL_SECONDS=60 \
+            vault-kv-cert-exporter:test
+
+      - name: Check /metrics
+        run: |
+          for i in $(seq 1 20); do
+            if curl -fsS http://localhost:9108/metrics | tee /tmp/metrics.txt; then
+              grep -q "vault_certificate_exporter_scrape_success" /tmp/metrics.txt
+              exit 0
+            fi
+            sleep 1
+          done
+
+          docker logs vault-kv-cert-exporter
+          exit 1
+
+      - name: Stop exporter
+        if: always()
+        run: docker rm -f vault-kv-cert-exporter || true
