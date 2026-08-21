@@ -44,13 +44,14 @@ Optional:
 
 - `VAULT_KV_MOUNTS` - comma-separated KV v2 mounts. Default: `app,secret,test`.
 - `VAULT_PATH_PREFIXES` - comma-separated metadata path prefixes to scan inside every mount. Default: full mount scan.
+- `VAULT_SCAN_ALL_PATHS` - read every discovered KV path and then select certificate-like fields inside each secret. Default: `true`.
 - `VAULT_VERIFY_TLS` - verify Vault TLS certificate. Default: `true`.
 - `VAULT_REQUEST_TIMEOUT_SECONDS` - Vault request timeout. Default: `15`.
 - `VAULT_MAX_DEPTH` - recursive metadata scan depth. Default: `10`.
 - `SCRAPE_INTERVAL_SECONDS` - scan interval. Default: `300`.
 - `LISTEN_ADDR` - HTTP bind address. Default: `0.0.0.0`.
 - `LISTEN_PORT` - HTTP port. Default: `9108`.
-- `CERT_PATH_REGEX` - regex for secret paths to read.
+- `CERT_PATH_REGEX` - regex for secret paths to read when `VAULT_SCAN_ALL_PATHS=false`.
 - `CERT_FIELD_REGEX` - regex for secret fields to parse.
 - `CRL_FIELD_REGEX` - regex for CRL fields to parse.
 - `KEY_FIELD_REGEX` - regex for private key fields to inventory without certificate parse-failed metrics.
@@ -59,7 +60,7 @@ Optional:
 - `VAULT_DEFAULT_OWNER` - owner label when service is not mapped. Default: `unknown`.
 - `LOG_LEVEL` - Python logging level. Default: `INFO`.
 
-Private keys such as `cert.key`, `tls.key` and `private.key` are inventoried as `type="private_key"` and are not exported as certificate parse failures. JKS, truststore and keystore values are inventoried as `type="keystore"`; parsing them requires a separate Java keystore reader and password handling, so they are intentionally not decoded by this exporter yet.
+Private keys such as `cert.key`, `tls.key`, `private.key`, and `RBT_MTLS_KEY_PATH` are inventoried as `type="private_key"` and are not exported as certificate parse failures. JKS, truststore and keystore values are inventoried as `type="keystore"`; parsing them requires a separate Java keystore reader and password handling, so they are intentionally not decoded by this exporter yet.
 
 ## Run Locally
 

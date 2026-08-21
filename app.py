@@ -31,7 +31,7 @@ CRL_FIELD_RE = re.compile(
     re.IGNORECASE,
 )
 KEY_FIELD_RE = re.compile(
-    os.getenv("KEY_FIELD_REGEX", r"(^|[./_-])(cert|tls|private)?\.?key$|private[_-]?key"),
+    os.getenv("KEY_FIELD_REGEX", r"(^|[./_-])(cert|tls|mtls|ssl|private)?[._-]?key([._-]?path)?$|private[_-]?key"),
     re.IGNORECASE,
 )
 KEYSTORE_FIELD_RE = re.compile(
@@ -134,6 +134,7 @@ class Settings:
     verify_tls: bool
     max_depth: int
     path_prefixes: List[str]
+    scan_all_paths: bool
 
     @staticmethod
     def from_env() -> "Settings":
@@ -150,6 +151,7 @@ class Settings:
             verify_tls=parse_bool(os.getenv("VAULT_VERIFY_TLS", "true")),
             max_depth=int(os.getenv("VAULT_MAX_DEPTH", "10")),
             path_prefixes=prefixes,
+            scan_all_paths=parse_bool(os.getenv("VAULT_SCAN_ALL_PATHS", "true")),
         )
 
 
@@ -272,8 +274,12 @@ def walk_metadata(client: VaultClient, mount: str, path: str, depth: int) -> Ite
         child = f"{path.rstrip('/')}/{key}".strip("/")
         if key.endswith("/"):
             yield from walk_metadata(client, mount, child.rstrip("/"), depth - 1)
-        elif PATH_RE.search(child):
+        elif should_scan_path(mount, child, settings):
             yield child
+
+
+def should_scan_path(mount: str, path: str, settings: Settings) -> bool:
+    return settings.scan_all_paths or bool(PATH_RE.search(path))
 
 
 def interesting_values(secret: Dict[str, Any]) -> Iterable[tuple[str, str, str]]:
@@ -489,6 +495,7 @@ def main() -> None:
             "vault_addr": settings.vault_addr,
             "mounts": ",".join(settings.mounts),
             "path_prefixes": ",".join(settings.path_prefixes),
+            "scan_all_paths": str(settings.scan_all_paths).lower(),
         }
     )
 
