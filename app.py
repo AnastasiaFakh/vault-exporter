@@ -256,10 +256,10 @@ class VaultClient:
 def discover_paths(client: VaultClient, mount: str, settings: Settings) -> Iterable[str]:
     roots = settings.path_prefixes or [""]
     for root in roots:
-        yield from walk_metadata(client, mount, root, settings.max_depth)
+        yield from walk_metadata(client, mount, root, settings.max_depth, settings)
 
 
-def walk_metadata(client: VaultClient, mount: str, path: str, depth: int) -> Iterable[str]:
+def walk_metadata(client: VaultClient, mount: str, path: str, depth: int, settings: Settings) -> Iterable[str]:
     if depth < 0:
         logger.warning("Max depth reached at %s/%s", mount, path)
         return
@@ -273,7 +273,7 @@ def walk_metadata(client: VaultClient, mount: str, path: str, depth: int) -> Ite
     for key in keys:
         child = f"{path.rstrip('/')}/{key}".strip("/")
         if key.endswith("/"):
-            yield from walk_metadata(client, mount, child.rstrip("/"), depth - 1)
+            yield from walk_metadata(client, mount, child.rstrip("/"), depth - 1, settings)
         elif should_scan_path(mount, child, settings):
             yield child
 

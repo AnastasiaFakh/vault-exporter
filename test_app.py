@@ -76,6 +76,19 @@ class PathDiscoveryTest(unittest.TestCase):
     def test_mtls_cert_path_is_certificate(self):
         self.assertEqual(app.classify_field("RBT_MTLS_CERT_PATH"), "certificate")
 
+    def test_discover_paths_passes_settings_into_recursive_walk(self):
+        class Client:
+            def list_metadata(self, mount, path=""):
+                if path == "":
+                    return ["cs.partner/"]
+                if path == "cs.partner":
+                    return ["appenv"]
+                return []
+
+        settings = self.settings(scan_all_paths=True)
+
+        self.assertEqual(list(app.discover_paths(Client(), "app", settings)), ["cs.partner/appenv"])
+
 
 if __name__ == "__main__":
     unittest.main()
