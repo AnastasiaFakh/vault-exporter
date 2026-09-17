@@ -319,6 +319,36 @@ def flatten_secret(value: Any, prefix: str = "") -> Iterable[tuple[str, Any]]:
         yield prefix, value
 
 
+def string_value(secret: Dict[str, Any], *keys: str) -> str:
+    for key in keys:
+        value = secret.get(key)
+        if value is not None:
+            return str(value).strip().lower()
+    return ""
+
+
+def bool_value(secret: Dict[str, Any], *keys: str) -> bool:
+    for key in keys:
+        value = secret.get(key)
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str) and value.strip().lower() in {"1", "true", "yes", "y", "on"}:
+            return True
+    return False
+
+
+def should_export_certificate_expiry(secret: Dict[str, Any]) -> bool:
+    status = string_value(secret, "usage_status", "status", "certificate_status")
+    index_status = string_value(secret, "index_status")
+    if status in {"revoked", "expired", "inactive", "disabled", "unused"}:
+        return False
+    if index_status in {"revoked", "expired", "r", "e"}:
+        return False
+    if bool_value(secret, "revoked", "is_revoked"):
+        return False
+    return True
+
+
 def parse_certificates(value: str) -> List[x509.Certificate]:
     candidates: List[bytes] = []
     raw = value.strip().encode("utf-8")
@@ -420,6 +450,14 @@ def collect_once(settings: Settings) -> None:
                         certificates = parse_certificates(value)
                         CERT_VALID.labels(mount=mount, path=path, field=field).set(1 if certificates else 0)
                         if not certificates:
+                            continue
+                        if not should_export_certificate_expiry(secret):
+                            logger.debug(
+                                "Skipping certificate expiry metrics for non-active inventory entry %s/%s field=%s",
+                                mount,
+                                path,
+                                field,
+                            )
                             continue
 
                         for index, cert in enumerate(certificates):

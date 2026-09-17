@@ -61,6 +61,14 @@ Optional:
 
 Private keys such as `cert.key`, `tls.key` and `private.key` are inventoried as `type="private_key"` and are not exported as certificate parse failures. JKS, truststore and keystore values are inventoried as `type="keystore"`; parsing them requires a separate Java keystore reader and password handling, so they are intentionally not decoded by this exporter yet.
 
+Certificate expiry metrics are not exported for inventory entries explicitly marked as unused:
+
+- `usage_status`, `status` or `certificate_status` is `revoked`, `expired`, `inactive`, `disabled` or `unused`
+- `index_status` is `revoked`, `expired`, `R` or `E`
+- `revoked` or `is_revoked` is `true`
+
+The secret is still visible through `vault_secret_inventory_present`, but it will not produce `vault_certificate_not_after_timestamp_seconds` or `vault_certificate_days_until_expiry`. This keeps legacy revoked/expired inventory records from firing certificate-expiry alerts.
+
 ## Run Locally
 
 ```bash
